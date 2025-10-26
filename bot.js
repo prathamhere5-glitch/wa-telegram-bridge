@@ -1,8 +1,8 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 // Replace with your real Telegram token and chat ID
-const TELEGRAM_TOKEN = 'YOUR_TELEGRAM_TOKEN_HERE';
-const TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID_HERE';
+const TELEGRAM_TOKEN = '8111876690:AAETmnCuSI71NXKiCI2VpgtoQiTq5sVliDw';
+const TELEGRAM_CHAT_ID = '6729390752';
 
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 

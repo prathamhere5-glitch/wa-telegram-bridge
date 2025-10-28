@@ -1,11 +1,29 @@
 {
-  "name": "whatsapp-bot",
+  "name": "telegram-whatsapp-automation-bot",
   "version": "1.0.0",
+  "description": "Telegram bot with WhatsApp automation for managing multiple accounts and sending random messages",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node bot.js",
+    "test": "node bot.js"
   },
+  "keywords": [
+    "telegram",
+    "whatsapp",
+    "automation",
+    "bot",
+    "messaging"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
-    "node-telegram-bot-api": "^0.61.0"
+    "node-telegram-bot-api": "^0.66.0",
+    "whatsapp-web.js": "^1.23.0",
+    "qrcode-terminal": "^0.12.0",
+    "qrcode": "^1.5.3",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

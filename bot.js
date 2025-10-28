@@ -1,10 +1,56 @@
+require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 
-// Replace with your real Telegram token and chat ID
-const TELEGRAM_TOKEN = '8111876690:AAH28e-37x48Q-NxrccgdOjkt9dfdwpqk0w';
-const TELEGRAM_CHAT_ID = '6729390752';
+// Get token from environment variable or use hardcoded value
+const TELEGRAM_TOKEN = (process.env.TELEGRAM_TOKEN || '8111876690:AAH28e-37x48Q-NxrccgdOjkt9dfdwpqk0w').trim();
+const TELEGRAM_CHAT_ID = (process.env.TELEGRAM_CHAT_ID || '6729390752').trim();
 
-const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
+// Validate token format
+if (!TELEGRAM_TOKEN || !TELEGRAM_TOKEN.includes(':')) {
+    console.error('❌ ERROR: Invalid Telegram bot token format!');
+    console.error('Please check your token at https://t.me/BotFather');
+    process.exit(1);
+}
+
+console.log('🔧 Initializing Telegram Bot...');
+console.log('📱 Bot Token:', TELEGRAM_TOKEN.substring(0, 15) + '...');
+
+// Create bot with improved polling configuration
+const bot = new TelegramBot(TELEGRAM_TOKEN, {
+    polling: {
+        interval: 300,
+        autoStart: true,
+        params: {
+            timeout: 10
+        }
+    }
+});
+
+// Handle polling errors with better error handling
+bot.on('polling_error', (error) => {
+    console.error('❌ Polling Error:', error.code, '-', error.message);
+    
+    if (error.code === 'ETELEGRAM' && error.message.includes('401')) {
+        console.error('');
+        console.error('🔴 AUTHENTICATION FAILED!');
+        console.error('');
+        console.error('Your bot token appears to be invalid or has been revoked.');
+        console.error('');
+        console.error('📝 Troubleshooting steps:');
+        console.error('1. Go to https://t.me/BotFather on Telegram');
+        console.error('2. Send /mybots');
+        console.error('3. Select your bot: @wsmessengerbot');
+        console.error('4. Click "API Token" to regenerate');
+        console.error('5. Update the token in .env file');
+        console.error('');
+        console.error('💡 Note: If you recently created the bot, wait a few minutes and try again.');
+        console.error('');
+        
+        // Stop polling to prevent infinite error loop
+        bot.stopPolling();
+        process.exit(1);
+    }
+});
 
 // Bot state
 let linkedAccounts = []; // Array of linked accounts (e.g., ['a', 'b'])
@@ -42,10 +88,16 @@ bot.onText(/\/start/, (msg) => {
         [{ text: '▶️ Start', callback_data: 'start' }, { text: '📊 Status', callback_data: 'status' }],
         [{ text: '📋 List Linked Accounts', callback_data: 'list_accounts' }, { text: '➕ Add Accounts', callback_data: 'add_accounts' }],
         [{ text: '⏱️ Delay', callback_data: 'delay' }, { text: '📅 Schedule', callback_data: 'schedule' }],
-        [{ text: '⏹️ Stop', callback_data: 'stop' }]
+        [{ text: '⏹️ Stop', callback_data: 'stop' }, { text: '👨‍💻 Developer', callback_data: 'developer' }]
     ];
     const replyMarkup = { inline_keyboard: keyboard };
-    bot.sendMessage(chatId, '🤖 *WhatsApp Automation Bot* - Your sleek control panel! Choose an option below:', { reply_markup: replyMarkup, parse_mode: 'Markdown' });
+    bot.sendMessage(chatId, '🤖 *WhatsApp Automation Bot* - Your sleek control panel! Choose an option below:', { reply_markup: replyMarkup, parse_mode: 'Markdown' })
+        .then(() => {
+            console.log('✅ /start command processed for chat:', chatId);
+        })
+        .catch((err) => {
+            console.error('❌ Error sending message:', err.message);
+        });
 });
 
 // Handle button callbacks
@@ -88,6 +140,8 @@ bot.on('callback_query', (query) => {
     } else if (data === 'stop') {
         isMessagingActive = false;
         bot.sendMessage(chatId, '⏹️ Messaging stopped. Take a break! 😎 Ready to restart? Click ▶️ Start.');
+    } else if (data === 'developer') {
+        bot.sendMessage(chatId, '👨‍💻 *Bot Developer Info*\n\n🤖 Bot: WhatsApp Automation Bot\n📦 Version: 1.0.0\n⚡ Powered by: Node.js + Telegram Bot API\n\n💡 This bot helps automate WhatsApp messaging between linked accounts!', { parse_mode: 'Markdown' });
     }
 
     bot.answerCallbackQuery(query.id);
@@ -111,4 +165,22 @@ bot.onText(/\/setschedule (.+)/, (msg, match) => {
     bot.sendMessage(chatId, `📅 Scheduled for ${scheduledTime}. Remember to send manually at that time! 🔔`);
 });
 
+// Graceful shutdown
+process.on('SIGINT', () => {
+    console.log('\n⏹️  Shutting down bot gracefully...');
+    bot.stopPolling();
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    console.log('\n⏹️  Shutting down bot gracefully...');
+    bot.stopPolling();
+    process.exit(0);
+});
+
+console.log('✅ Bot initialized successfully!');
 console.log('🤖 WhatsApp Automation Bot is running smoothly... 🚀');
+console.log('📱 Waiting for /start command from Telegram...');
+console.log('');
+console.log('💡 To test: Open Telegram and send /start to @wsmessengerbot');
+console.log('');

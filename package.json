@@ -5,7 +5,9 @@
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
-    "test": "node bot.js"
+    "start:improved": "node bot-improved.js",
+    "test": "node test-token.js",
+    "check": "bash check-running.sh"
   },
   "keywords": [
     "telegram",

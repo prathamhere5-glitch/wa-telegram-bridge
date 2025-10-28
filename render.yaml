@@ -1,0 +1,13 @@
+services:
+  - type: worker
+    name: telegram-whatsapp-bot
+    env: node
+    buildCommand: npm install
+    startCommand: node bot.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
